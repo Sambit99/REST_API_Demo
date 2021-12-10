@@ -20,6 +20,7 @@ const createSendToken = (user, statusCode, res) => {
     httpOnly: true,
   };
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
   res.cookie('jwt', token, cookieOptions);
 
   // Removing password from output
@@ -71,6 +72,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token)
@@ -94,6 +97,28 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //Grant access to protected route
   req.user = freshUser;
+  next();
+});
+
+// Only for rendered pages, No errors
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    const token = req.cookies.jwt;
+
+    //Token Verification
+    const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    //Check if user still exists
+    const freshUser = await User.findById(decode.id);
+    if (!freshUser) return next();
+
+    // Check if user changed Password
+    if (freshUser.changedPasswordAfter(decode.iat)) return next();
+
+    // There is a Logged in User
+    res.locals.user = freshUser;
+    return next();
+  }
   next();
 });
 
