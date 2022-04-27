@@ -12,6 +12,7 @@ const signToken = (id) =>
   });
 
 const createSendToken = (user, statusCode, res) => {
+  console.log('Create and send token path');
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
@@ -49,6 +50,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
+  console.log('Login path');
   const { email, password } = req.body;
 
   //1. Checking if email and password exist
@@ -63,6 +65,18 @@ exports.login = catchAsync(async (req, res, next) => {
 
   createSendToken(user, 200, res);
 });
+
+exports.logout = (req, res, next) => {
+  console.log('Auth.logout');
+  res.cookie('jwt', 'loggedOut', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: 'success',
+    messgae: 'Logged out succesfully',
+  });
+};
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
@@ -97,30 +111,35 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //Grant access to protected route
   req.user = freshUser;
+  res.locals.user = freshUser;
   next();
 });
 
 // Only for rendered pages, No errors
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
-    const token = req.cookies.jwt;
+    try {
+      const token = req.cookies.jwt;
 
-    //Token Verification
-    const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+      //Token Verification
+      const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-    //Check if user still exists
-    const freshUser = await User.findById(decode.id);
-    if (!freshUser) return next();
+      //Check if user still exists
+      const freshUser = await User.findById(decode.id);
+      if (!freshUser) return next();
 
-    // Check if user changed Password
-    if (freshUser.changedPasswordAfter(decode.iat)) return next();
+      // Check if user changed Password
+      if (freshUser.changedPasswordAfter(decode.iat)) return next();
 
-    // There is a Logged in User
-    res.locals.user = freshUser;
-    return next();
+      // There is a Logged in User
+      res.locals.user = freshUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
   }
-  next();
-});
+  return next();
+};
 
 exports.restrictTo =
   (...roles) =>

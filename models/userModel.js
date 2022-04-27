@@ -47,16 +47,16 @@ const userSchema = new mongoose.Schema({
   active: { type: Boolean, default: true, select: false },
 });
 
-// userSchema.pre('save', async function (next) {
-//   //Only run this function if password is modified
-//   if (!this.isModified('password')) return next();
+userSchema.pre('save', async function (next) {
+  //Only run this function if password is modified
+  if (!this.isModified('password')) return next();
 
-//   this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 12);
 
-//   //Delete PasswordConfirm field
-//   this.passwordConfirm = undefined;
-//   next();
-// });
+  //Delete PasswordConfirm field
+  this.passwordConfirm = undefined;
+  next();
+});
 
 // userSchema.pre('save', function (next) {
 //   if (!this.isModified('password') || this.isNew) return next();

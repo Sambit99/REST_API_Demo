@@ -1,9 +1,11 @@
 /*eslint-disable*/
 // const catchAsync = require('./../../utils/catchAsync');
 
-// import axios from 'axios';
+import axios from 'axios';
+import '@babel/polyfill';
+import { showAlert } from './alerts';
 
-const login = async (email, password) => {
+export const login = async (email, password) => {
   console.log(email, password);
   try {
     axios.defaults.withCredentials = true;
@@ -22,7 +24,7 @@ const login = async (email, password) => {
     });
 
     if (res.data.status === 'success') {
-      alert(`Logged in successfully`);
+      showAlert('success', `Logged in successfully`);
       window.setTimeout(() => {
         location.assign('/');
       }, 1500);
@@ -55,14 +57,38 @@ const login = async (email, password) => {
     // console.log(await res.json());
   } catch (err) {
     // console.log(err.response.data, '😅😅😅');
-    alert(err.response.data.message);
+    showAlert('error', err.response.data.message);
   }
 };
 
-document.querySelector('.form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  console.log('Button clicked');
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  login(email, password);
-});
+export const logout = async () => {
+  try {
+    axios.defaults.withCredentials = true;
+    const res = await axios({
+      method: 'GET',
+      url: 'http://127.0.0.1:8080/api/v1/users/logout',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    // const res = await fetch('https://127.0.0.1:8080/api/v1/users/logout', {
+    //   method: 'GET',
+    //   mmode: 'cors',
+    //   cache: 'default',
+    //   credentials: 'include',
+    //   headers: {
+    //     'Content-Type': 'application/JSON',
+    //   },
+    // });
+    // const data = await res.json();
+    // console.log(data);
+    document.cookie = `jwt=loggedOut;max-age=${1}`;
+    console.log(res);
+    showAlert('success', 'Logged out');
+    if (res.data.status === 'success') location.reload(true);
+  } catch (err) {
+    console.log(err);
+    showAlert('error', 'Error logging out! Try again.');
+  }
+};
