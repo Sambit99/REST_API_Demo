@@ -5,7 +5,7 @@ const Tour = require('./../../models/tourModel');
 const User = require('./../../models/userModel');
 const Review = require('./../../models/reviewModel');
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './../../config.env' });
 
 const DB = process.env.DATABASE_LOCAL;
 
@@ -56,6 +56,8 @@ const deleteAllData = async () => {
   }
   process.exit();
 };
+
+// console.log(process.argv);
 
 if (process.argv[2] === '--import') {
   importData();
