@@ -11,6 +11,7 @@ exports.bookTour = async (tourId) => {
       url: `http://127.0.0.1:8080/api/v1/bookings/checkout-session/${tourId}`,
     });
     console.log(session);
+    // console.log(stripe);
     // 2. Create checkout form and charge credit card
     // window.location.assign session.data.session.url
     window.location.assign(session.data.session.url);

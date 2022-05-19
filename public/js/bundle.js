@@ -9531,7 +9531,8 @@ function () {
 
           case 3:
             session = _context.sent;
-            console.log(session); // 2. Create checkout form and charge credit card
+            console.log(session); // console.log(stripe);
+            // 2. Create checkout form and charge credit card
             // window.location.assign session.data.session.url
 
             window.location.assign(session.data.session.url);
@@ -9943,7 +9944,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51666" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60618" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

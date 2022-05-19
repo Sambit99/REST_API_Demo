@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set security HTTP headers
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: true,
   })
 );
 // False shoudn't be used
